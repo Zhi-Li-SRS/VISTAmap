@@ -1,6 +1,6 @@
-#  Stripes Removal for Optical Microscopy Images
+# VISTAmap: Stripes Removal for Optical Microscopy Images
 
-This project provides Python scripts (VISTAmap)for removing stitching stripes in optical microscopy images, specifically for SRS images. The scripts correct the intensity values of the stripes to generate a seamless image with better visual quality.
+This project provides a Python implementation of VISTAmap (VIgnetted Stitched-Tile Adjustment using Morphological Adaptive Processing) for removing stitching stripes and correcting vignetting in optical microscopy images, specifically designed for SRS and other whole slide imaging modalities.
 
 ## Comparison of Raw and Processed Images
 ![SRS DeStripe Comparison](https://github.com/Zhi-Li-SRS/SRS_DeStripe/blob/main/comparison/raw_vs_removed.png?raw=true)
@@ -19,9 +19,8 @@ This project provides Python scripts (VISTAmap)for removing stitching stripes in
 
 2. Create a virtual environment (optional but recommended):
    ```
-    conda create -n destripe python=3.9
-    conda activate destripe
-
+   conda create -n destripe python=3.9
+   conda activate destripe
    ```
 
 3. Install the required packages:
@@ -30,42 +29,53 @@ This project provides Python scripts (VISTAmap)for removing stitching stripes in
    ```
 
 ## Usage
-Prepare the input image and mask file. The mask file should be a binary image with the same dimensions as the input image, where the background is 0 and the foreground is 1. 
 
-VISTAmap Algorithm
-The VISTAmap algorithm uses FFT analysis and adaptive morphological processing to remove stripes and correct vignetting in stitched tile images.
-
+### Basic Usage
 Run the script with the following command:
 
 ```
-python vistamap.py --image_path path/to/your/image.tif --mask_path path/to/your/mask.tif --output_path output/result.tif --tile_size 256(optional)
+python vistamap.py --image_path path/to/your/image.tif --mask_path path/to/your/mask.tif --output_path output/result.tif --tile_size 250
 ```
 
-Args
-- `--image_path`: Path to the input image file (default: "791.tif")
-- `--mask_path`: Path to the mask file (default: "srs_mask.tif")
-- `--output_path`: Path to save the processed output image
-- `--tile_size`: Optional arameter to specify the size of each tile (e.g., 256). If not provided, the algorithm will attempt to detect tile size using FFT analysis.
+### Command Line Arguments
+- `--image_path`: Path to the input image file (default: "MAX_Left-HSI.tif")
+- `--mask_path`: Path to the mask file (default: "MAX_Left-HSI-mask.tif"). If the mask file doesn't exist or isn't provided, the algorithm will automatically generate a mask using texture-based tissue isolation
+- `--output_path`: Path to save the processed output image (default: "output/process_protein.tif")
+- `--tile_size`: Size of each tile in pixels (default: 250). If provided, this value will be used instead of FFT-based tile size detection
+
+### Automatic Mask Generation
+If you don't have a mask file, VISTAmap can automatically generate one:
+
+```
+python vistamap.py --image_path your_image.tif --output_path output/result.tif --tile_size 250
+```
+
+The algorithm uses texture-based morphological operations to automatically isolate tissue regions from the background.
 
 
 ## Requirements
-Recommand install the packages using conda:
 
-The script requires the following Python packages:
-- numpy
-- opencv-python
-- tifffile
-- scipy
-- scikit-learn
+The script requires the following Python packages (automatically installed via requirements.txt):
+- numpy==1.24.3
+- opencv-python==4.8.0.76
+- opencv-contrib-python==4.8.0.76
+- scipy==1.10.1
+- scikit-learn==1.3.0
+- tifffile==2024.9.20
+- matplotlib (for visualization)
 
-These can be installed using the `requirements.txt` file provided in the repository.
+## Output
+
+The algorithm generates:
+- **Processed image**: Saved at the specified output path
+- **Comparison image**: A side-by-side comparison saved as `[output_name]_compare.png`
 
 ## Recommendations
 
-- For optimal results with the VISTAmap algorithm, provide both the image and a binary mask separating foreground from background.
-- If you know the exact tile size used in microscopy acquisition, specify it using the `--tile_size` parameter for faster process.
-- VISTAmap generally produces better results for complex images with both striping and vignetting issues.
-
+- **Mask Usage**: For optimal results, provide a binary mask separating foreground tissue from background. If unavailable, the automatic mask generation works well for most tissue samples.
+- **Tile Size**: If you know the exact tile size used during image acquisition, specify it using `--tile_size` for more accurate and faster processing.
+- **Image Format**: The algorithm specifically works with 2D images.
+- **Performance**: VISTAmap is particularly effective for images with both striping artifacts and vignetting issues common in large-area stitching issue in optical microscopy.
 
 ## License
 

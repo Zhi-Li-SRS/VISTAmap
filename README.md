@@ -81,5 +81,13 @@ The algorithm generates:
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
+## Citation
+
+If you use VISTAmap in your research, please cite our paper:
+
+```
+Fung AA, Fung AH, Li Z, Shi L. Single-Frame Vignetting Correction for Post-Stitched-Tile Imaging Using VISTAmap. Nanomaterials. 2025 Apr 7;15(7):563.
+```
+
 
 

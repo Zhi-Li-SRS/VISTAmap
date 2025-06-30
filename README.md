@@ -83,10 +83,15 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Citation
 
-If you use VISTAmap in your research, please cite our paper:
+If you use this codebase or otherwise found our work valuable, please cite our paper:
 
 ```
-Fung AA, Fung AH, Li Z, Shi L. Single-Frame Vignetting Correction for Post-Stitched-Tile Imaging Using VISTAmap. Nanomaterials. 2025 Apr 7;15(7):563.
+@article{paper,
+      title={Fung AA, Fung AH, Li Z, Shi L. Single-Frame Vignetting Correction for Post-Stitched-Tile Imaging Using VISTAmap}, 
+      author={Fung AA, Fung AH, Li Z, Shi L},
+      year={2025},
+      journal={Nanomaterials}
+}
 ```
 
 

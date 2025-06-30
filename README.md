@@ -85,12 +85,12 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 If you use this codebase or otherwise found our work valuable, please cite our paper:
 
-```bibtex
-@article{vistamap2025,
-    title={Single-Frame Vignetting Correction for Post-Stitched-Tile Imaging Using VISTAmap},
-    author={Fung, AA and Fung, AH and Li, Z and Shi, L},
-    journal={Nanomaterials},
-    year={2025}
+```
+@article{paper,
+      title={Single-Frame Vignetting Correction for Post-Stitched-Tile Imaging Using VISTAmap}, 
+      author={Fung AA, Fung AH, Li Z, Shi L},
+      year={2025},
+      journal={Nanomaterials}
 }
 ```
 

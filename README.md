@@ -30,24 +30,47 @@ This project provides a Python implementation of VISTAmap (VIgnetted Stitched-Ti
 
 ## Usage
 
-### Basic Usage
-Run the script with the following command:
-
+### Single image
 ```
-python vistamap.py --image_path path/to/your/image.tif --mask_path path/to/your/mask.tif --output_path output/result.tif --tile_size 250
+python vistamap.py \
+  --image_path input/787.tif \
+  --mask_path input/srs_mask.tif \
+  --output_path output/lung/787.tif \
+  --tile_size 250
+```
+
+### Batch processing with one shared mask
+```
+python vistamap.py \
+  --image_path input \
+  --mask_path input/srs_mask.tif \
+  --output_dir output/lung
+```
+
+To also save comparison images in batch mode, add:
+```
+--save_comparison
 ```
 
 ### Command Line Arguments
-- `--image_path`: Path to the input image file (default: "MAX_Left-HSI.tif")
-- `--mask_path`: Path to the mask file (default: "MAX_Left-HSI-mask.tif"). If the mask file doesn't exist or isn't provided, the algorithm will automatically generate a mask using texture-based tissue isolation
-- `--output_path`: Path to save the processed output image (default: "output/process_protein.tif")
-- `--tile_size`: Size of each tile in pixels (default: 250). If provided, this value will be used instead of FFT-based tile size detection
+- `--image_path`: Path to a single image file or an input directory for batch processing (default: `input`).
+- `--mask_path`: Path to the mask file (default: `input/srs_mask.tif`). If missing or not found, a mask will be generated automatically using texture-based tissue isolation.
+- `--output_path`: Path to save the processed output image in single-file mode (default: `output/lung/787.tif`).
+- `--output_dir`: Directory to save outputs in batch mode (default: `output/lung`).
+- `--tile_size`: Size of each tile in pixels (default: 250). If provided, this value will be used instead of FFT-based tile size detection.
+- `--save_comparison`: When set, also save a side-by-side comparison figure (`*_compare.png`) next to each output image.
 
 ### Automatic Mask Generation
-If you don't have a mask file, VISTAmap can automatically generate one:
+If you don't have a mask file, VISTAmap can automatically generate one.
 
+- Single image (no mask provided):
 ```
-python vistamap.py --image_path your_image.tif --output_path output/result.tif --tile_size 250
+python vistamap.py --image_path input/787.tif --output_path output/lung/787.tif --tile_size 250
+```
+
+- Batch processing (no mask provided):
+```
+python vistamap.py --image_path input --output_dir output/lung --tile_size 250
 ```
 
 The algorithm uses texture-based morphological operations to automatically isolate tissue regions from the background.
@@ -67,8 +90,8 @@ The script requires the following Python packages (automatically installed via r
 ## Output
 
 The algorithm generates:
-- **Processed image**: Saved at the specified output path
-- **Comparison image**: A side-by-side comparison saved as `[output_name]_compare.png`
+- **Processed image**: Saved at the specified `--output_path` (single-file) or inside `--output_dir` (batch mode).
+- **Comparison image (optional)**: Saved only when `--save_comparison` is provided, as `[output_basename]_compare.png` in the same directory as the output.
 
 ## Recommendations
 

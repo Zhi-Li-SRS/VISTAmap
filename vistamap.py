@@ -259,8 +259,20 @@ class VISTAmapDestriper:
 
         return edge_positions, dominant_freq
 
-    def remove_stripes_vistamap(self, image_path, mask_path=None, output_path="process.tif"):
-        """remove stripes from the image using VISTAmap method"""
+    def remove_stripes_vistamap(self, image_path, mask_path=None, output_path="process.tif", save_comparison=False):
+        """remove stripes from the image using VISTAmap method
+
+        Parameters
+        ----------
+        image_path : str
+            Path to the input image file.
+        mask_path : str | None
+            Path to the mask file. If None or missing, a mask will be generated automatically.
+        output_path : str
+            Path to save the processed output image.
+        save_comparison : bool
+            When True, also save a side-by-side comparison figure alongside the output image.
+        """
         self.output_path = output_path
 
         # Create output directory
@@ -312,22 +324,23 @@ class VISTAmapDestriper:
         # Rescale to original intensity range
         final_image = final_image * (image_max - image_min) + image_min
 
-        # Compare original and final images
-        original = tifffile.imread(image_path)
-        if original.ndim > 2:
-            original = original.squeeze()
+        # Optionally save comparison figure
+        if save_comparison:
+            original = tifffile.imread(image_path)
+            if original.ndim > 2:
+                original = original.squeeze()
 
-        plt.figure(figsize=(15, 10))
-        plt.subplot(121)
-        plt.imshow(original, cmap="gray")
-        plt.title("Original Image")
+            plt.figure(figsize=(15, 10))
+            plt.subplot(121)
+            plt.imshow(original, cmap="gray")
+            plt.title("Original Image")
 
-        plt.subplot(122)
-        plt.imshow(final_image, cmap="gray")
-        plt.title("Corrected Image")
-        comparison_path = os.path.splitext(output_path)[0] + "_compare.png"
-        plt.savefig(comparison_path, dpi=300, bbox_inches="tight")
-        plt.close()
+            plt.subplot(122)
+            plt.imshow(final_image, cmap="gray")
+            plt.title("Corrected Image")
+            comparison_path = os.path.splitext(output_path)[0] + "_compare.png"
+            plt.savefig(comparison_path, dpi=300, bbox_inches="tight")
+            plt.close()
 
         # Save the final image
         tifffile.imwrite(output_path, final_image.astype(np.float32))
@@ -338,35 +351,92 @@ class VISTAmapDestriper:
 
 def main():
     parser = argparse.ArgumentParser(description="VISTAmap")
-    parser.add_argument("--image_path", type=str, default="MAX_Left-HSI.tif", help="Path to the image file.")
+    parser.add_argument("--image_path", type=str, default="input", help="Path to the image file or a directory for batch processing.")
     parser.add_argument(
         "--mask_path",
         type=str,
-        default="MAX_Left-HSI-mask.tif",
+        default="input/srs_mask.tif",
         help="Better to have the path to the mask file. If not provided, a mask will be generated automatically.",
     )
     parser.add_argument(
-        "--output_path", type=str, default="output/process_protein.tif", help="Path to save the output image."
+        "--output_path", type=str, default="output/lung/787.tif", help="Path to save the output image (used when processing a single file)."
+    )
+    parser.add_argument(
+        "--output_dir", type=str, default="output/lung", help="Directory to save outputs (used when processing a directory)."
     )
     parser.add_argument(
         "--tile_size", type=int, default=250, help="Optional to specify the size of each tile (e.g., 256)"
     )
+    parser.add_argument(
+        "--save_comparison", action="store_true", help="Whether to also save comparison figures alongside outputs."
+    )
     args = parser.parse_args()
 
     if not os.path.exists(args.image_path):
-        print(f"Error: Input image file not found: {args.image_path}")
+        print(f"Error: Input path not found: {args.image_path}")
         return
 
     if args.mask_path is not None and not os.path.exists(args.mask_path):
         print(f"Warning: Mask file not found: {args.mask_path}. Will generate automatically.")
         args.mask_path = None
 
-    print(f"Starting VISTAmap processing on {args.image_path}")
     processor = VISTAmapDestriper(tile_size=args.tile_size)
 
-    processor.remove_stripes_vistamap(args.image_path, args.mask_path, args.output_path)
+    if os.path.isdir(args.image_path):
+        # Batch processing mode
+        input_dir = args.image_path
+        output_dir = args.output_dir if args.output_dir else "output"
+        os.makedirs(output_dir, exist_ok=True)
 
-    print("Processing completed successfully!")
+        valid_exts = {".tif", ".tiff"}
+        input_entries = sorted(os.listdir(input_dir))
+        num_processed = 0
+        for entry in input_entries:
+            if entry.startswith('.'):
+                continue
+            ext = os.path.splitext(entry)[1].lower()
+            if ext not in valid_exts:
+                continue
+            image_fp = os.path.join(input_dir, entry)
+            try:
+                if args.mask_path and os.path.exists(args.mask_path):
+                    try:
+                        if os.path.samefile(image_fp, args.mask_path):
+                            continue
+                    except FileNotFoundError:
+                        pass
+            except Exception:
+                pass
+
+            out_fp = os.path.join(output_dir, os.path.basename(image_fp))
+            print(f"Processing: {image_fp} -> {out_fp}")
+            processor.remove_stripes_vistamap(
+                image_fp,
+                args.mask_path,
+                out_fp,
+                save_comparison=args.save_comparison,
+            )
+            num_processed += 1
+
+        print(f"Batch processing completed. Total images processed: {num_processed}")
+    else:
+        # Single file processing mode
+        image_fp = args.image_path
+        if args.output_path:
+            out_fp = args.output_path
+        else:
+            out_dir = args.output_dir if args.output_dir else "output"
+            os.makedirs(out_dir, exist_ok=True)
+            out_fp = os.path.join(out_dir, os.path.basename(image_fp))
+
+        print(f"Starting VISTAmap processing on {image_fp}")
+        processor.remove_stripes_vistamap(
+            image_fp,
+            args.mask_path,
+            out_fp,
+            save_comparison=args.save_comparison,
+        )
+        print("Processing completed successfully!")
 
 
 if __name__ == "__main__":

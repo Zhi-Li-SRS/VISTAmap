@@ -259,7 +259,9 @@ class VISTAmapDestriper:
 
         return edge_positions, dominant_freq
 
-    def remove_stripes_vistamap(self, image_path, mask_path=None, output_path="process.tif", save_comparison=False):
+    def remove_stripes_vistamap(
+        self, image_path, mask_path=None, output_path="process.tif", save_comparison=False
+    ):
         """remove stripes from the image using VISTAmap method
 
         Parameters
@@ -351,7 +353,12 @@ class VISTAmapDestriper:
 
 def main():
     parser = argparse.ArgumentParser(description="VISTAmap")
-    parser.add_argument("--image_path", type=str, default="input", help="Path to the image file or a directory for batch processing.")
+    parser.add_argument(
+        "--image_path",
+        type=str,
+        default="input",
+        help="Path to the image file or a directory for batch processing.",
+    )
     parser.add_argument(
         "--mask_path",
         type=str,
@@ -359,16 +366,24 @@ def main():
         help="Better to have the path to the mask file. If not provided, a mask will be generated automatically.",
     )
     parser.add_argument(
-        "--output_path", type=str, default="output/lung/787.tif", help="Path to save the output image (used when processing a single file)."
+        "--output_path",
+        type=str,
+        default="output/lung/787.tif",
+        help="Path to save the output image (used when processing a single file).",
     )
     parser.add_argument(
-        "--output_dir", type=str, default="output/lung", help="Directory to save outputs (used when processing a directory)."
+        "--output_dir",
+        type=str,
+        default="output/lung",
+        help="Directory to save outputs (used when processing a directory).",
     )
     parser.add_argument(
         "--tile_size", type=int, default=250, help="Optional to specify the size of each tile (e.g., 256)"
     )
     parser.add_argument(
-        "--save_comparison", action="store_true", help="Whether to also save comparison figures alongside outputs."
+        "--save_comparison",
+        action="store_true",
+        help="Whether to also save comparison figures alongside outputs.",
     )
     args = parser.parse_args()
 
@@ -392,7 +407,7 @@ def main():
         input_entries = sorted(os.listdir(input_dir))
         num_processed = 0
         for entry in input_entries:
-            if entry.startswith('.'):
+            if entry.startswith("."):
                 continue
             ext = os.path.splitext(entry)[1].lower()
             if ext not in valid_exts:
@@ -411,10 +426,7 @@ def main():
             out_fp = os.path.join(output_dir, os.path.basename(image_fp))
             print(f"Processing: {image_fp} -> {out_fp}")
             processor.remove_stripes_vistamap(
-                image_fp,
-                args.mask_path,
-                out_fp,
-                save_comparison=args.save_comparison,
+                image_fp, args.mask_path, out_fp, save_comparison=args.save_comparison
             )
             num_processed += 1
 
@@ -431,10 +443,7 @@ def main():
 
         print(f"Starting VISTAmap processing on {image_fp}")
         processor.remove_stripes_vistamap(
-            image_fp,
-            args.mask_path,
-            out_fp,
-            save_comparison=args.save_comparison,
+            image_fp, args.mask_path, out_fp, save_comparison=args.save_comparison
         )
         print("Processing completed successfully!")
 
